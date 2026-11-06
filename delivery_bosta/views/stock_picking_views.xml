@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_picking_form_bosta" model="ir.ui.view">
+        <field name="name">stock.picking.form.bosta</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock_delivery.view_picking_withcarrier_out_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='carrier_id']" position="after">
+                <field name="is_bosta" invisible="1"/>
+                <field name="bosta_cod_amount" invisible="not is_bosta"
+                       readonly="carrier_tracking_ref or state in ('done', 'cancel')"/>
+                <field name="bosta_state" invisible="not is_bosta or not bosta_state"/>
+                <field name="bosta_state_date" invisible="not is_bosta or not bosta_state_date"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_picking_search_bosta" model="ir.ui.view">
+        <field name="name">stock.picking.search.bosta</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <field name="bosta_state"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

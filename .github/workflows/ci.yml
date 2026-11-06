@@ -1,0 +1,38 @@
+name: odoo-20-tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: odoo
+          POSTGRES_PASSWORD: odoo
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U odoo" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: addons
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Odoo 20 source
+        run: git clone --depth 1 -b 20.0 https://github.com/odoo/odoo odoo
+      - name: Odoo dependencies
+        run: |
+          grep -viE "^python-ldap|^gevent|^greenlet" odoo/requirements.txt \
+            | sed 's/^psycopg2==/psycopg2-binary==/' > req.txt
+          pip install -q -r req.txt
+      - name: Install module and run its tests
+        run: |
+          python odoo/odoo-bin --addons-path=odoo/addons,odoo/odoo/addons,addons \
+            -d test --db_host localhost --db_user odoo --db_password odoo \
+            -i delivery_bosta --test-tags /delivery_bosta --stop-after-init \
+            --log-level=test --http-port=8169 2>&1 | tee odoo.log
+          grep -q "0 failed, 0 error(s)" odoo.log
+          ! grep -E " (ERROR|CRITICAL) " odoo.log

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_delivery_carrier_form_bosta" model="ir.ui.view">
+        <field name="name">delivery.carrier.form.bosta</field>
+        <field name="model">delivery.carrier</field>
+        <field name="inherit_id" ref="delivery.view_delivery_carrier_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='tracking_url']" position="attributes">
+                <attribute name="invisible">delivery_type not in ('fixed', 'base_on_rule', 'bosta')</attribute>
+            </xpath>
+            <xpath expr="//page[@name='destination']" position="before">
+                <page string="Bosta" name="bosta" invisible="delivery_type != 'bosta'">
+                    <group>
+                        <group string="Account">
+                            <field name="bosta_api_key" password="True" required="delivery_type == 'bosta'"/>
+                            <field name="bosta_api_version"/>
+                            <field name="bosta_allow_open_package"/>
+                        </group>
+                        <group string="Status updates">
+                            <field name="bosta_webhook_url" widget="CopyClipboardChar"/>
+                            <div colspan="2" class="text-muted">
+                                Register this URL as the webhook in your Bosta dashboard. A scheduled job also
+                                polls open shipments in case a webhook is missed.
+                            </div>
+                        </group>
+                    </group>
+                    <button name="action_bosta_import_cities" type="object" string="Import Bosta Cities"
+                            class="btn-secondary" icon="fa-download"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
